@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
+  <defs>
+    <linearGradient id="floor" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#123c68"/>
+      <stop offset="1" stop-color="#0a2748"/>
+    </linearGradient>
+  </defs>
+  <rect width="1920" height="1080" fill="url(#floor)"/>
+  <!-- perspective raised-floor tile grid -->
+  <g stroke="#3d6a99" stroke-opacity="0.45" fill="none">
+    <line x1="0" y1="1080" x2="760" y2="430" stroke-width="2"/>
+    <line x1="320" y1="1080" x2="880" y2="430" stroke-width="2"/>
+    <line x1="640" y1="1080" x2="1000" y2="430" stroke-width="2"/>
+    <line x1="960" y1="1080" x2="1120" y2="430" stroke-width="2"/>
+    <line x1="1280" y1="1080" x2="1240" y2="430" stroke-width="2"/>
+    <line x1="1600" y1="1080" x2="1360" y2="430" stroke-width="2"/>
+    <line x1="1920" y1="1080" x2="1480" y2="430" stroke-width="2"/>
+    <line x1="0" y1="1080" x2="1920" y2="1080" stroke-width="2"/>
+    <line x1="0" y1="920" x2="1920" y2="920" stroke-width="2"/>
+    <line x1="120" y1="800" x2="1800" y2="800" stroke-width="1.6"/>
+    <line x1="230" y1="700" x2="1700" y2="700" stroke-width="1.4"/>
+    <line x1="320" y1="620" x2="1620" y2="620" stroke-width="1.2"/>
+    <line x1="390" y1="555" x2="1560" y2="555" stroke-width="1"/>
+    <line x1="450" y1="500" x2="1510" y2="500" stroke-width="0.8"/>
+    <line x1="500" y1="460" x2="1470" y2="460" stroke-width="0.6"/>
+    <line x1="540" y1="430" x2="1440" y2="430" stroke-width="0.5"/>
+  </g>
+  <rect x="0" y="0" width="1920" height="430" fill="#0a2748" opacity="0.35"/>
+  <g font-family="Arial, Helvetica, sans-serif" text-anchor="end">
+    <text x="1880" y="1010" font-size="26" font-weight="bold" fill="#9fc0de">HERO PLACEHOLDER — replace with wide site photo or video poster</text>
+    <text x="1880" y="1044" font-size="20" fill="#7fa3c6">Suggested: completed installation or data hall, 1920×1080 JPG</text>
+  </g>
+</svg>
