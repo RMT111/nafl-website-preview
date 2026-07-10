@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   /* ----- Mobile dropdown (Services) ----- */
-  var mobileQuery = window.matchMedia('(max-width: 960px)');
+  var mobileQuery = window.matchMedia('(max-width: 1160px)');
 
   document.querySelectorAll('.has-dropdown > a').forEach(function (link) {
     link.addEventListener('click', function (e) {
