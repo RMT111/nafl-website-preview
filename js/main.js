@@ -65,8 +65,10 @@ document.addEventListener('DOMContentLoaded', function () {
   // browsers suspend IntersectionObserver there, which would leave the
   // content invisible. Content-first, animation second.
   if (!reduceMotion && !document.hidden && 'IntersectionObserver' in window) {
+    // Calmer target set: section intros, card rows and CTA bands only —
+    // not every small element, so the motion reads as intentional.
     var revealTargets = document.querySelectorAll(
-      '.card, .section-head, .split > *, .cta-band, .proof-item'
+      '.card, .section-head, .split > *, .cta-band'
     );
 
     var observer = new IntersectionObserver(function (entries) {
@@ -76,13 +78,13 @@ document.addEventListener('DOMContentLoaded', function () {
           observer.unobserve(entry.target);
         }
       });
-    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.1 });
+    }, { rootMargin: '0px 0px -10% 0px', threshold: 0.12 });
 
     revealTargets.forEach(function (el) {
-      // Stagger siblings slightly so grids cascade in
+      // Gentle stagger so grids cascade in without feeling slow
       var siblings = el.parentElement ? el.parentElement.children : [el];
       var index = Array.prototype.indexOf.call(siblings, el);
-      el.style.setProperty('--reveal-delay', (Math.min(index, 5) * 70) + 'ms');
+      el.style.setProperty('--reveal-delay', (Math.min(index, 4) * 55) + 'ms');
       el.classList.add('reveal');
       observer.observe(el);
     });
@@ -108,5 +110,57 @@ document.addEventListener('DOMContentLoaded', function () {
       alert('Thank you — this form will be activated once the website goes live. In the meantime please email info@nafl.co.uk or call 01482 483950.');
     });
   });
+
+  /* ----- Header: condense on scroll + back-to-top visibility -----
+     One passive scroll listener, throttled with requestAnimationFrame. */
+  var header = document.querySelector('.site-header');
+  var toTop = document.querySelector('.to-top');
+  var ticking = false;
+
+  function onScroll() {
+    var y = window.pageYOffset || document.documentElement.scrollTop;
+    if (header) { header.classList.toggle('scrolled', y > 24); }
+    if (toTop) { toTop.classList.toggle('show', y > 600); }
+    ticking = false;
+  }
+  window.addEventListener('scroll', function () {
+    if (!ticking) { window.requestAnimationFrame(onScroll); ticking = true; }
+  }, { passive: true });
+  onScroll();
+
+  if (toTop) {
+    toTop.addEventListener('click', function () {
+      window.scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' });
+    });
+  }
+
+  /* ----- Instant navigation: prefetch same-site pages on hover/touch -----
+     Makes clicking between pages feel immediate. Skips on data-saver / slow
+     connections and ignores downloads, tel/mailto and in-page anchors. */
+  (function () {
+    var conn = navigator.connection;
+    if (conn && (conn.saveData || /(^|-)2g$/.test(conn.effectiveType || ''))) return;
+
+    var prefetched = {};
+    function prefetch(href) {
+      if (prefetched[href]) return;
+      prefetched[href] = true;
+      var l = document.createElement('link');
+      l.rel = 'prefetch';
+      l.href = href;
+      document.head.appendChild(l);
+    }
+    function maybePrefetch(e) {
+      var a = e.target.closest && e.target.closest('a[href]');
+      if (!a || a.origin !== location.origin) return;
+      if (a.hasAttribute('download')) return;
+      var raw = a.getAttribute('href') || '';
+      if (/^(tel:|mailto:|#)/.test(raw)) return;
+      if (a.pathname === location.pathname) return; // same page (e.g. anchor)
+      prefetch(a.href);
+    }
+    document.addEventListener('mouseover', maybePrefetch, { passive: true });
+    document.addEventListener('touchstart', maybePrefetch, { passive: true });
+  })();
 
 });
