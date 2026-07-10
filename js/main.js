@@ -66,7 +66,7 @@ document.addEventListener('DOMContentLoaded', function () {
   // content invisible. Content-first, animation second.
   if (!reduceMotion && !document.hidden && 'IntersectionObserver' in window) {
     var revealTargets = document.querySelectorAll(
-      '.card, .sector-card, .project-card, .section-head, .split > *, .cta-panel, .download-list li, .gallery-grid figure'
+      '.card, .section-head, .split > *, .cta-band, .proof-item'
     );
 
     var observer = new IntersectionObserver(function (entries) {
