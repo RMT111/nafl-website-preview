@@ -268,13 +268,6 @@ img { max-width: 100%; display: block; }
 .consent { display: flex; gap: 10px; align-items: flex-start; font-size: 0.88rem; color: var(--ink-soft); }
 .consent input { margin-top: 4px; }
 
-/* ---------- Breadcrumb ---------- */
-.crumb { display: flex; flex-wrap: wrap; align-items: center; font-size: 0.8rem; padding: 20px 0 4px; color: var(--ink-soft); }
-.crumb a { display: inline-flex; align-items: center; color: var(--ink-soft); text-decoration: none; transition: color var(--dur-fast) var(--ease); }
-.crumb a:hover { color: var(--blue-bright); }
-.crumb-home::before { content: ""; display: inline-block; width: 13px; height: 13px; margin-right: 6px; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2351677c' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 10.5 12 3l9 7.5'/%3E%3Cpath d='M5 9.5V21h14V9.5'/%3E%3C/svg%3E") center/contain no-repeat; }
-.crumb > * + *::before { content: "\203A"; margin: 0 10px; color: var(--blue-border); }
-.crumb [aria-current="page"] { color: var(--navy); font-weight: 600; }
 
 /* ---------- Footer ---------- */
 .site-footer { background: var(--navy); color: #b9cbdb; padding: 56px 0 0; font-size: 0.95rem; }
