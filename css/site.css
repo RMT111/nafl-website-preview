@@ -315,14 +315,14 @@ img { max-width: 100%; display: block; }
   .has-mega.open > a::before { transform: rotate(180deg); }
   /* Mega becomes a stacked accordion on mobile */
   .main-nav > ul > li.has-mega { position: static; }
-  .mega { position: static; opacity: 1; visibility: visible; transform: none; pointer-events: auto; box-shadow: none; border: 0; border-radius: 0; padding: 0 0 8px 14px; max-height: 0; overflow: hidden; transition: max-height var(--dur) var(--ease); }
+  .mega { position: static; opacity: 1; visibility: hidden; transform: none; pointer-events: auto; box-shadow: none; border: 0; border-radius: 0; padding: 0 0 0 14px; max-height: 0; overflow: hidden; transition: max-height var(--dur) var(--ease); }
   .mega::before { display: none; }
   .mega-inner { grid-template-columns: 1fr; gap: 6px; }
   .mega-groups { grid-template-columns: 1fr !important; gap: 0; }
   .mega-item { opacity: 1; transform: none; padding: 10px 12px; }
   .mega-head { margin: 14px 0 4px; padding-left: 12px; }
   .mega-feature { display: none; }
-  .has-mega.open .mega { max-height: 1600px; }
+  .has-mega.open .mega { max-height: 1600px; visibility: visible; padding-bottom: 12px; }
 }
 
 @media (max-width: 960px) {
