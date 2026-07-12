@@ -205,7 +205,7 @@ img { max-width: 100%; display: block; }
 .section--grey .img-ph, .plain .img-ph { background: repeating-linear-gradient(45deg, #dde8f3, #dde8f3 14px, #e7f0f8 14px, #e7f0f8 28px); color: #7690a7; border-radius: var(--radius); }
 
 /* ---------- Proof strip ---------- */
-.proof-strip { background: var(--blue-pale); border-top: 1px solid var(--blue-border); border-bottom: 1px solid var(--blue-border); }
+.proof-strip { background: linear-gradient(180deg, #f6f7f9 0%, #e6e9ed 100%); border-top: 1px solid #d7dce1; border-bottom: 1px solid #d1d6db; }
 .proof-strip .wrap { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; padding-top: 26px; padding-bottom: 26px; }
 .proof-item { display: flex; flex-direction: column; gap: 2px; }
 .proof-item strong { color: var(--navy); font-size: 1rem; }
