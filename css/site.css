@@ -223,9 +223,11 @@ img { max-width: 100%; display: block; }
 .card:hover { transform: translateY(-6px); box-shadow: var(--shadow-hover); border-color: var(--blue-bright); }
 .card:hover::before { transform: scaleX(1); }
 .card h3 { color: var(--navy); }
-.card .tag { display: inline-flex; align-items: center; gap: 7px; align-self: flex-start; font-size: 0.66rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.1px; color: var(--blue); background: var(--blue-pale); border: 1px solid var(--blue-border); padding: 5px 12px 5px 10px; border-radius: 100px; margin-bottom: 16px; transition: border-color var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease); }
-.card .tag::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--blue-bright); flex: none; box-shadow: 0 0 0 3px rgba(43,127,208,0.15); }
-.card:hover .tag { border-color: var(--blue-bright); color: var(--navy); }
+/* Editorial eyebrow label (accent line + spaced uppercase) — not a pill/chip */
+.card .tag { display: inline-flex; align-items: center; gap: 11px; align-self: flex-start; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.6px; color: var(--blue); background: none; border: 0; padding: 0; margin-bottom: 14px; transition: color var(--dur-fast) var(--ease); }
+.card .tag::before { content: ""; width: 22px; height: 2px; border-radius: 2px; background: var(--blue-bright); flex: none; transition: width var(--dur) var(--ease); }
+.card:hover .tag { color: var(--navy); }
+.card:hover .tag::before { width: 34px; }
 .card p { color: var(--ink-soft); font-size: 0.97rem; margin-bottom: 16px; }
 .card .card-link { margin-top: auto; font-weight: 600; font-size: 0.95rem; color: var(--blue-bright); }
 .card .card-link::after { content: " \2192"; display: inline-block; transition: transform var(--dur) var(--ease); }
