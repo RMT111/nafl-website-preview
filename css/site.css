@@ -200,6 +200,16 @@ img { max-width: 100%; display: block; }
 .hero--compact .hero-inner { grid-template-columns: 1fr; padding: 56px 0; }
 .hero--compact .hero-media { display: none; }
 
+/* ---------- Hero background video (muted, looping) ---------- */
+.hero-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; pointer-events: none; }
+/* No scrim — the video shows clean */
+.hero--video::before { display: none; }
+.hero--video .wrap { z-index: 2; }
+.hero--video .hero-inner { padding: 104px 0; min-height: 420px; align-content: center; }
+@media (max-width: 620px) {
+  .hero--video .hero-inner { padding: 64px 0; min-height: 0; }
+}
+
 /* Image placeholder */
 .img-ph { background: repeating-linear-gradient(45deg, rgba(255,255,255,0.05), rgba(255,255,255,0.05) 14px, rgba(255,255,255,0.02) 14px, rgba(255,255,255,0.02) 28px); color: #a9c1d8; display: flex; align-items: center; justify-content: center; text-align: center; padding: 24px; font-size: 0.85rem; width: 100%; height: 100%; min-height: 230px; }
 .section--grey .img-ph, .plain .img-ph { background: repeating-linear-gradient(45deg, #dde8f3, #dde8f3 14px, #e7f0f8 14px, #e7f0f8 28px); color: #7690a7; border-radius: var(--radius); }
@@ -234,7 +244,9 @@ img { max-width: 100%; display: block; }
 .card:hover .card-link::after { transform: translateX(5px); }
 
 .media-card { padding: 0; overflow: hidden; border-top: 1px solid var(--blue-border); }
-.media-card .media-card-img { aspect-ratio: 16/10; }
+/* Fixed height (not aspect-ratio, which the image's own size overrides) so every
+   project card has an identical image band — portrait photos crop instead of stretching the card */
+.media-card .media-card-img { height: 210px; overflow: hidden; }
 .media-card .media-card-img .img-ph { min-height: 0; height: 100%; }
 .media-card .media-card-img img { width: 100%; height: 100%; object-fit: cover; }
 
