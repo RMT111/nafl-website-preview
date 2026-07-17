@@ -57,36 +57,53 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   });
 
-  /* ----- Scroll-reveal animations -----
-     Applied from JS so the site still renders fully with JS disabled. */
+  /* ----- Entrances -----
+     CSS pre-hides these (only under .js-ready); we add .is-in once they scroll in.
+     Fires once per element, then unobserves. Never re-runs. */
   var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var revealTargets = document.querySelectorAll(
+    '.section-head, .card, .cta-band, .prose, .product-shot'
+  );
 
-  // Skip animations when the page loads in a hidden tab / preview pane:
-  // browsers suspend IntersectionObserver there, which would leave the
-  // content invisible. Content-first, animation second.
-  if (!reduceMotion && !document.hidden && 'IntersectionObserver' in window) {
-    // Calmer target set: section intros, card rows and CTA bands only —
-    // not every small element, so the motion reads as intentional.
-    var revealTargets = document.querySelectorAll(
-      '.card, .section-head, .split > *, .cta-band'
-    );
+  // Show everything immediately, unstyled by the entrance layer, when animating
+  // would be wrong or unsafe: reduced motion, no IntersectionObserver, or a tab
+  // that loads hidden (observers are suspended and CSS animations don't advance
+  // there, which would strand the hero and cards invisible).
+  function showEverything() {
+    document.documentElement.classList.remove('js-ready');
+    revealTargets.forEach(function (el) { el.classList.add('is-in'); });
+  }
 
+  if (reduceMotion || !('IntersectionObserver' in window) || document.hidden) {
+    showEverything();
+  } else {
     var observer = new IntersectionObserver(function (entries) {
       entries.forEach(function (entry) {
         if (entry.isIntersecting) {
-          entry.target.classList.add('visible');
+          entry.target.classList.add('is-in');
           observer.unobserve(entry.target);
         }
       });
-    }, { rootMargin: '0px 0px -10% 0px', threshold: 0.12 });
+    }, { threshold: 0.15 });
 
     revealTargets.forEach(function (el) {
-      // Gentle stagger so grids cascade in without feeling slow
+      // Stagger grouped items (grid cells / card rows) 70ms apart
       var siblings = el.parentElement ? el.parentElement.children : [el];
       var index = Array.prototype.indexOf.call(siblings, el);
-      el.style.setProperty('--reveal-delay', (Math.min(index, 4) * 55) + 'ms');
-      el.classList.add('reveal');
+      el.style.setProperty('--reveal-delay', (Math.min(index, 5) * 70) + 'ms');
       observer.observe(el);
+    });
+
+    // Safety net: if the tab is backgrounded mid-load, don't strand content hidden
+    document.addEventListener('visibilitychange', function () {
+      if (!document.hidden) {
+        setTimeout(function () {
+          revealTargets.forEach(function (el) {
+            var r = el.getBoundingClientRect();
+            if (r.top < window.innerHeight && r.bottom > 0) { el.classList.add('is-in'); }
+          });
+        }, 100);
+      }
     });
   }
 
@@ -119,7 +136,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   function onScroll() {
     var y = window.pageYOffset || document.documentElement.scrollTop;
-    if (header) { header.classList.toggle('scrolled', y > 24); }
+    if (header) { header.classList.toggle('scrolled', y > 80); }
     if (toTop) { toTop.classList.toggle('show', y > 600); }
     ticking = false;
   }

@@ -24,11 +24,26 @@
   --w-content: 1140px;
   --w-text: 800px;
 
-  /* Motion tokens */
-  --dur-fast: 180ms;
-  --dur: 260ms;
-  --dur-slow: 550ms;
-  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  /* ---------- Motion system ----------
+     Durations: micro (state), standard (movement), enter (entrances). Nothing longer.
+     Easing: ease-enter settles out long; ease-state for hover/press/toggle.
+     Only transform + opacity are animated anywhere. */
+  --dur-micro: 150ms;
+  --dur-standard: 250ms;
+  --dur-enter: 400ms;
+  --ease-enter: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-state: cubic-bezier(0.4, 0, 0.2, 1);
+  --stagger: 70ms;
+  /* Legacy aliases so pre-existing rules inherit the system above */
+  --dur-fast: var(--dur-micro);
+  --dur: var(--dur-standard);
+  --dur-slow: var(--dur-standard);
+  --ease: var(--ease-state);
+
+  /* Elevation ladder — rest / raised (hover) / pressed */
+  --shadow-rest: 0 1px 3px rgba(11, 59, 111, 0.08);
+  --shadow-raised: 0 12px 28px rgba(11, 59, 111, 0.18);
+  --shadow-press: 0 1px 2px rgba(11, 59, 111, 0.14);
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -46,31 +61,81 @@ h3 { font-size: 1.25rem; margin-bottom: 0.4em; }
 h4 { font-size: 1.02rem; margin-bottom: 0.4em; }
 p { margin-bottom: 1em; }
 p:last-child { margin-bottom: 0; }
-a { color: var(--blue); text-decoration: none; transition: color var(--dur-fast) var(--ease); }
+a { color: var(--blue); text-decoration: none; transition: color var(--dur-micro) var(--ease-state); }
 a:hover { color: var(--blue-bright); }
 img { max-width: 100%; display: block; }
 
-/* ---------- Scroll-reveal (class applied by main.js) ---------- */
-.reveal { opacity: 0; }
-.reveal.visible {
-  opacity: 1;
-  animation: reveal-up 0.5s var(--ease) backwards;
-  animation-delay: var(--reveal-delay, 0s);
+/* ---------- Content links: underline wipes in from the left ----------
+   transform on a pseudo-element, never text-decoration. Buttons/cards excluded. */
+.prose a:not(.btn), .site-footer a, .note a, .tick-list a, .top-bar a {
+  position: relative; text-decoration: none;
 }
-@keyframes reveal-up { from { opacity: 0; transform: translateY(14px); } }
+.prose a:not(.btn)::after, .site-footer a::after, .note a::after,
+.tick-list a::after, .top-bar a::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: -2px; height: 1px;
+  background: currentColor; transform: scaleX(0); transform-origin: left center;
+  transition: transform var(--dur-standard) var(--ease-state);
+}
+.prose a:not(.btn):hover::after, .site-footer a:hover::after, .note a:hover::after,
+.tick-list a:hover::after, .top-bar a:hover::after,
+.prose a:not(.btn):focus-visible::after, .site-footer a:focus-visible::after,
+.tick-list a:focus-visible::after, .top-bar a:focus-visible::after { transform: scaleX(1); }
 
-/* Page-load entrance — fades the main content up so full-page reloads
-   between pages feel continuous rather than a flash. */
-.page-main { animation: page-in 0.45s var(--ease) both; }
-@keyframes page-in { from { opacity: 0; transform: translateY(10px); } }
+/* ---------- Entrances ----------
+   Pre-hidden ONLY under .js-ready (set by an inline script in <head>), so with JS
+   disabled everything renders normally. transform + opacity only → no layout shift. */
+.js-ready .section-head,
+.js-ready .card,
+.js-ready .cta-band,
+.js-ready .prose,
+.js-ready .product-shot {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity var(--dur-enter) var(--ease-enter),
+              transform var(--dur-enter) var(--ease-enter);
+  transition-delay: var(--reveal-delay, 0ms);
+  will-change: opacity, transform;
+}
+.js-ready .section-head.is-in,
+.js-ready .card.is-in,
+.js-ready .cta-band.is-in,
+.js-ready .prose.is-in,
+.js-ready .product-shot.is-in {
+  opacity: 1; transform: none; will-change: auto;
+}
 
+/* Hero animates on load (not on scroll) — starts immediately, no flash */
+.js-ready .hero h1,
+.js-ready .hero p.lead,
+.js-ready .hero .btn-row { animation: enter-up var(--dur-enter) var(--ease-enter) both; }
+.js-ready .hero p.lead { animation-delay: var(--stagger); }
+.js-ready .hero .btn-row { animation-delay: calc(var(--stagger) * 2); }
+@keyframes enter-up { from { opacity: 0; transform: translateY(24px); } }
+
+/* ---------- Reduced motion: kill all movement, keep everything visible ---------- */
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  .reveal { opacity: 1; }
-  * { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; animation-delay: 0s !important; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0s !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0s !important;
+  }
+  .js-ready .section-head, .js-ready .card, .js-ready .cta-band,
+  .js-ready .prose, .js-ready .product-shot,
+  .js-ready .hero h1, .js-ready .hero p.lead, .js-ready .hero .btn-row {
+    opacity: 1 !important; transform: none !important; will-change: auto !important;
+  }
+  .btn:hover, .btn:active, .card:hover, .js-ready .card.is-in:hover,
+  .to-top.show:hover, .to-top.show:active, .nav-toggle:active,
+  .mobile-bar a:active, .consent input:hover, .consent input:active { transform: none !important; }
+  .card:hover .media-card-img img, .product-card:hover .product-thumb img,
+  .js-ready .card.is-in:hover .media-card-img img { transform: none !important; }
 }
 
-:focus-visible { outline: 3px solid var(--blue-bright); outline-offset: 2px; }
+/* Focus rings: always visible, never animated away */
+:focus-visible { outline: 3px solid var(--blue-bright); outline-offset: 2px; transition: none; }
 .hero :focus-visible, .cta-band :focus-visible, .top-bar :focus-visible,
 .site-footer :focus-visible, .section--navy :focus-visible { outline-color: var(--white); }
 
@@ -92,13 +157,16 @@ img { max-width: 100%; display: block; }
   display: inline-flex; align-items: center; gap: 8px;
   padding: 13px 26px; border-radius: var(--radius); font-weight: 600; font-size: 1rem;
   text-decoration: none; cursor: pointer; border: 2px solid transparent;
-  transition: background-color var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease),
-    border-color var(--dur-fast) var(--ease), transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+  box-shadow: var(--shadow-rest);
+  transition: background-color var(--dur-micro) var(--ease-state), color var(--dur-micro) var(--ease-state),
+    border-color var(--dur-micro) var(--ease-state), transform var(--dur-micro) var(--ease-state),
+    box-shadow var(--dur-micro) var(--ease-state);
 }
-.btn:hover { transform: translateY(-2px); text-decoration: none; }
-.btn:active { transform: translateY(0) scale(0.98); transition-duration: 80ms; }
+/* Press state carries the tactility — lifts on hover, sinks under the finger */
+.btn:hover { transform: translateY(-1px); box-shadow: var(--shadow-raised); text-decoration: none; }
+.btn:active { transform: translateY(1px); box-shadow: var(--shadow-press); }
 .btn-primary { background: var(--blue-bright); color: var(--white); border-color: var(--blue-bright); }
-.btn-primary:hover { background: var(--blue); border-color: var(--blue); color: var(--white); box-shadow: 0 12px 28px rgba(11,59,111,0.35); }
+.btn-primary:hover { background: var(--blue); border-color: var(--blue); color: var(--white); }
 .btn-secondary { background: transparent; color: var(--blue); border-color: var(--blue); }
 .btn-secondary:hover { background: var(--blue); color: var(--white); }
 .btn-ghost { background: transparent; color: var(--white); border-color: var(--white); }
@@ -112,14 +180,20 @@ img { max-width: 100%; display: block; }
 .top-bar a:hover { color: var(--white); text-decoration: none; }
 
 /* ---------- Header / nav ---------- */
-.site-header { background: var(--white); border-bottom: 3px solid var(--blue); position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(11,59,111,0.08); transition: box-shadow var(--dur) var(--ease); }
-.header-inner { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 24px; padding-top: 14px; padding-bottom: 14px; transition: padding var(--dur) var(--ease); }
+/* Sticky header: settles from flat/solid to blurred + lifted once scrolled past ~80px.
+   Background/shadow only — never padding or height, so it can't shift layout. */
+.site-header { background: var(--white); border-bottom: 3px solid var(--blue); position: sticky; top: 0; z-index: 100; box-shadow: var(--shadow-rest);
+  transition: box-shadow var(--dur-standard) var(--ease-state), background-color var(--dur-standard) var(--ease-state); }
+.header-inner { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 24px; padding-top: 14px; padding-bottom: 14px; }
 .logo { display: flex; align-items: center; text-decoration: none; flex-shrink: 0; }
-.logo-img { height: 52px; width: auto; transform: translateY(-8px); transition: height var(--dur) var(--ease); }
-/* Condensed state once the page is scrolled */
-.site-header.scrolled { box-shadow: 0 8px 26px rgba(11,59,111,0.16); }
-.site-header.scrolled .header-inner { padding-top: 7px; padding-bottom: 7px; }
-.site-header.scrolled .logo-img { height: 42px; }
+.logo-img { height: 52px; width: auto; transform: translateY(-8px); }
+/* Scrolled state: translucent + blurred so content passes under it, and it lifts */
+.site-header.scrolled {
+  background: rgba(255, 255, 255, 0.82);
+  -webkit-backdrop-filter: blur(14px) saturate(1.15);
+  backdrop-filter: blur(14px) saturate(1.15);
+  box-shadow: 0 6px 24px rgba(11, 59, 111, 0.14);
+}
 
 .main-nav ul { list-style: none; display: flex; align-items: center; gap: 2px; }
 .main-nav > ul > li { position: relative; }
@@ -181,8 +255,10 @@ img { max-width: 100%; display: block; }
 .mega-feature-btn { display: inline-block; font-weight: 700; font-size: 0.9rem; color: #bfe0ff; position: relative; transition: color var(--dur-fast) var(--ease), transform var(--dur) var(--ease); }
 .mega-feature:hover .mega-feature-btn { color: #fff; transform: translateX(4px); }
 
-.nav-toggle { display: none; background: none; border: 0; font-size: 1.7rem; line-height: 1; color: var(--navy); cursor: pointer; padding: 4px 10px; border-radius: 6px; transition: background-color var(--dur-fast) var(--ease); }
-.nav-toggle:hover { background: var(--blue-pale); }
+.nav-toggle { display: none; background: none; border: 0; font-size: 1.7rem; line-height: 1; color: var(--navy); cursor: pointer; padding: 4px 10px; border-radius: 6px;
+  transition: background-color var(--dur-micro) var(--ease-state), transform var(--dur-micro) var(--ease-state), color var(--dur-micro) var(--ease-state); }
+.nav-toggle:hover { background: var(--blue-pale); color: var(--blue-bright); }
+.nav-toggle:active { transform: scale(0.92); }
 
 /* ---------- Hero ---------- */
 .hero { position: relative; background: var(--navy); color: var(--white); overflow: hidden; }
@@ -218,11 +294,13 @@ img { max-width: 100%; display: block; }
 .cols-3 { grid-template-columns: repeat(3, 1fr); }
 .cols-4 { grid-template-columns: repeat(4, 1fr); }
 
-.card { position: relative; overflow: hidden; background: var(--white); border: 1px solid var(--blue-border); border-radius: 12px; padding: 30px 26px; box-shadow: 0 1px 3px rgba(11,59,111,0.06); display: flex; flex-direction: column; transition: transform var(--dur-slow) var(--ease), box-shadow var(--dur-slow) var(--ease), border-color var(--dur) var(--ease); }
-/* Top accent grows in from the left on hover — clean by default, alive on hover */
-.card::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--blue-bright), var(--blue)); transform: scaleX(0); transform-origin: left center; transition: transform var(--dur) var(--ease); }
-.card:hover { transform: translateY(-6px); box-shadow: var(--shadow-hover); border-color: var(--blue-bright); }
+.card { position: relative; overflow: hidden; background: var(--white); border: 1px solid var(--blue-border); border-radius: 12px; padding: 30px 26px; box-shadow: var(--shadow-rest); display: flex; flex-direction: column;
+  transition: transform var(--dur-standard) var(--ease-state), box-shadow var(--dur-standard) var(--ease-state), border-color var(--dur-standard) var(--ease-state); }
+/* Top accent wipes in from the left on hover — clean by default, alive on hover */
+.card::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--blue-bright), var(--blue)); transform: scaleX(0); transform-origin: left center; transition: transform var(--dur-standard) var(--ease-state); z-index: 1; }
+.card:hover, .js-ready .card.is-in:hover { transform: translateY(-4px); box-shadow: var(--shadow-raised); border-color: var(--blue-bright); }
 .card:hover::before { transform: scaleX(1); }
+.card:hover { will-change: transform; }
 .card h3 { color: var(--navy); }
 /* Editorial eyebrow label (accent line + spaced uppercase) — not a pill/chip */
 .card .tag { display: inline-flex; align-items: center; gap: 11px; align-self: flex-start; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.6px; color: var(--blue); background: none; border: 0; padding: 0; margin-bottom: 14px; transition: color var(--dur-fast) var(--ease); }
@@ -239,16 +317,18 @@ img { max-width: 100%; display: block; }
    project card has an identical image band — portrait photos crop instead of stretching the card */
 .media-card .media-card-img { height: 210px; overflow: hidden; }
 .media-card .media-card-img .img-ph { min-height: 0; height: 100%; }
-.media-card .media-card-img img { width: 100%; height: 100%; object-fit: cover; }
+.media-card .media-card-img img { width: 100%; height: 100%; object-fit: cover; transition: transform var(--dur-standard) var(--ease-state); }
+/* Image moves inside its frame; the frame itself never moves (overflow clipped above) */
+.card:hover .media-card-img img, .js-ready .card.is-in:hover .media-card-img img { transform: scale(1.04); }
 
 /* Official Tate product render — no frame, sits directly on the page/card */
 .product-shot { margin: 0; padding: 0; display: flex; align-items: center; justify-content: center; }
 .product-shot img { max-width: 100%; max-height: 420px; width: auto; height: auto; }
 /* Thumbnail on product cards. Fixed height (not aspect-ratio) so every render —
    square or landscape — centres in an identical box and card text lines up. */
-.product-card .product-thumb { display: flex; align-items: center; justify-content: center; height: 168px; margin-bottom: 18px; }
-.product-card .product-thumb img { max-width: 100%; max-height: 100%; width: auto; height: auto; transition: transform var(--dur-slow) var(--ease); }
-.product-card:hover .product-thumb img { transform: scale(1.05); }
+.product-card .product-thumb { display: flex; align-items: center; justify-content: center; height: 168px; margin-bottom: 18px; overflow: hidden; }
+.product-card .product-thumb img { max-width: 100%; max-height: 100%; width: auto; height: auto; transition: transform var(--dur-standard) var(--ease-state); }
+.product-card:hover .product-thumb img, .js-ready .product-card.is-in:hover .product-thumb img { transform: scale(1.04); }
 .media-card .media-card-body { padding: 22px 24px 26px; display: flex; flex-direction: column; flex: 1; }
 
 /* ---------- CTA band ---------- */
@@ -279,7 +359,12 @@ img { max-width: 100%; display: block; }
 .field.full { grid-column: 1 / -1; }
 .field label { font-weight: 600; font-size: 0.88rem; color: var(--navy); }
 .field input, .field select, .field textarea { width: 100%; max-width: 100%; box-sizing: border-box; font-family: inherit; font-size: 1rem; padding: 11px 13px; border: 1px solid var(--blue-border); border-radius: 6px; background: var(--white); color: var(--ink); transition: border-color var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease); }
+.field input:hover, .field select:hover, .field textarea:hover { border-color: var(--blue-bright); }
 .field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: var(--blue-bright); box-shadow: 0 0 0 3px rgba(43,127,208,0.18); }
+.field input:focus-visible, .field select:focus-visible, .field textarea:focus-visible { outline: 3px solid var(--blue-bright); outline-offset: 1px; }
+.consent input { cursor: pointer; transition: transform var(--dur-micro) var(--ease-state); }
+.consent input:hover { transform: scale(1.1); }
+.consent input:active { transform: scale(0.95); }
 .field textarea { min-height: 120px; resize: vertical; }
 .consent { display: flex; gap: 10px; align-items: flex-start; font-size: 0.88rem; color: var(--ink-soft); }
 .consent input { margin-top: 4px; }
@@ -297,15 +382,19 @@ img { max-width: 100%; display: block; }
 
 /* ---------- Sticky mobile contact bar ---------- */
 .mobile-bar { display: none; position: fixed; bottom: 0; left: 0; right: 0; z-index: 120; background: var(--navy); border-top: 2px solid var(--blue-bright); }
-.mobile-bar a { flex: 1; text-align: center; color: var(--white); font-weight: 600; font-size: 0.8rem; padding: 10px 4px; display: flex; flex-direction: column; align-items: center; gap: 3px; transition: background-color var(--dur-fast) var(--ease); }
-.mobile-bar a:hover { text-decoration: none; }
+.mobile-bar a { flex: 1; text-align: center; color: var(--white); font-weight: 600; font-size: 0.8rem; padding: 10px 4px; display: flex; flex-direction: column; align-items: center; gap: 3px;
+  transition: background-color var(--dur-micro) var(--ease-state), transform var(--dur-micro) var(--ease-state); }
+.mobile-bar a:hover { text-decoration: none; background: rgba(255,255,255,0.08); }
+.mobile-bar a:active { transform: translateY(1px); }
+.mobile-bar a.primary:hover { background: var(--blue); }
 .mobile-bar a.primary { background: var(--blue-bright); }
 .mobile-bar .ic { font-size: 1.05rem; }
 
 /* ---------- Back to top ---------- */
 .to-top { position: fixed; right: 24px; bottom: 24px; z-index: 110; width: 46px; height: 46px; border: 0; border-radius: 50%; background: var(--navy); color: var(--white); font-size: 1.2rem; cursor: pointer; box-shadow: var(--shadow); opacity: 0; visibility: hidden; transform: translateY(12px); transition: opacity var(--dur) var(--ease), transform var(--dur) var(--ease), background var(--dur-fast) var(--ease), visibility 0s linear var(--dur); }
 .to-top.show { opacity: 1; visibility: visible; transform: none; transition: opacity var(--dur) var(--ease), transform var(--dur) var(--ease), background var(--dur-fast) var(--ease), visibility 0s; }
-.to-top:hover { background: var(--blue-bright); transform: translateY(-2px); }
+.to-top.show:hover { background: var(--blue-bright); transform: translateY(-1px); box-shadow: var(--shadow-raised); }
+.to-top.show:active { transform: translateY(1px); box-shadow: var(--shadow-press); }
 
 /* Anchor jumps clear the sticky header */
 :target { scroll-margin-top: 100px; }
